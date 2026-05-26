@@ -1,0 +1,7 @@
+AR_TRANSCRIPTOR v1.23 - importación estable
+
+- Corrige cuelgues al importar copias grandes.
+- Limpia búsquedas activas antes de cargar texto importado.
+- Limita renderizado de listas muy largas para mantener fluida la app.
+- Carga texto con señales bloqueadas durante importación.
+- Agrega validación de JSON y cursor de espera.

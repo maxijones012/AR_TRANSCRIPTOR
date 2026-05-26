@@ -1,0 +1,10 @@
+AR_TRANSCRIPTOR v1.20 - Interlocutores básicos
+
+Cambios:
+- Nuevo botón “👥 Interlocutores”.
+- Diarización básica general editable: Speaker 1 / Speaker 2.
+- Permite renombrar interlocutores y aplicar nombres a todos los bloques.
+- Puede crear bloques desde segmentos si todavía no hay P/R activo.
+- Guarda speaker_names en copias importables y export JSON.
+
+Aclaración: no identifica voces de forma biométrica; es una base automática para editar y corregir.

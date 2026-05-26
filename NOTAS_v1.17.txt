@@ -1,0 +1,17 @@
+AR_TRANSCRIPTOR v1.17 - búsqueda, atajos y escucha rápida
+
+Cambios principales:
+- Búsqueda inteligente dentro de la transcripción completa.
+- Resaltado de coincidencias y navegación anterior/siguiente.
+- Atajos de teclado:
+  Ctrl+F: buscar
+  Ctrl+S: guardar copia automática
+  Ctrl+O: seleccionar archivo
+  Ctrl+Enter: transcribir
+  F2: editar bloque seleccionado
+  F3 / Shift+F3: resultado siguiente/anterior
+- En el editor de bloque, el reproductor del fragmento ahora permite velocidad 1x, 1.25x, 1.5x y 2x.
+- Se mantiene el enfoque general de la app, sin lenguaje específico policial.
+
+Probar con run_app.bat.
+Para generar EXE nuevo usar build_windows.bat.

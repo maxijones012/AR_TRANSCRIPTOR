@@ -1,0 +1,8 @@
+AR_TRANSCRIPTOR v1.14
+
+Cambios:
+- El editor de bloque ahora muestra abajo una lista de todas las frases/bloques.
+- Al hacer click en cualquier frase de esa lista, se carga en el editor para modificar etiqueta e texto.
+- Se mantiene el reproductor de fragmento por bloque.
+- Se corrigio el QTextEdit duplicado dentro del modal.
+- Version actualizada a 1.14 editor con lista de frases.

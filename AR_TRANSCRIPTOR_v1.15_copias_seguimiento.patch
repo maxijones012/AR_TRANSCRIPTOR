@@ -1,0 +1,375 @@
+diff -ruN ar_v114/NOTAS_v1.15.txt ar_v115/NOTAS_v1.15.txt
+--- ar_v114/NOTAS_v1.15.txt	1970-01-01 00:00:00.000000000 +0000
++++ ar_v115/NOTAS_v1.15.txt	2026-05-26 01:22:26.418702673 +0000
+@@ -0,0 +1,12 @@
++AR_TRANSCRIPTOR v1.15 - copias + seguimiento de audio
++
++Cambios:
++- Guarda una copia importable de cada transcripción de manera silenciosa en la carpeta local de la app.
++- Agrega botón "Importar copia" para recuperar trabajos anteriores.
++- Las copias incluyen texto mostrado, segmentos, bloques P/R, etiquetas, configuración y ruta del archivo original.
++- En el editor de bloque, al reproducir el fragmento se resalta aproximadamente la palabra o sección del texto por donde va el audio.
++- El resaltado funciona de forma aproximada por proporción de tiempo del bloque; si el audio original no está disponible, el reproductor avisa.
++
++Uso:
++- Probar: run_app.bat
++- Generar EXE: build_windows.bat
+Binary files ar_v114/__pycache__/main.cpython-313.pyc and ar_v115/__pycache__/main.cpython-313.pyc differ
+diff -ruN ar_v114/main.py ar_v115/main.py
+--- ar_v114/main.py	2026-05-26 01:13:53.207719066 +0000
++++ ar_v115/main.py	2026-05-26 01:22:11.162120526 +0000
+@@ -1,6 +1,7 @@
+ import json
+ import re
+ import os
++import hashlib
+ import shutil
+ import subprocess
+ import sys
+@@ -11,7 +12,7 @@
+ from typing import Any, Dict, List, Optional, Tuple
+ 
+ from PySide6.QtCore import QPoint, QRect, QSize, Qt, QThread, Signal, QTimer, QUrl
+-from PySide6.QtGui import QDragEnterEvent, QDropEvent
++from PySide6.QtGui import QColor, QDragEnterEvent, QDropEvent, QTextCharFormat, QTextCursor
+ from PySide6.QtWidgets import (
+     QApplication,
+     QCheckBox,
+@@ -46,7 +47,7 @@
+ from theme import build_stylesheet, load_theme_name, save_theme_name, theme_toggle_text
+ 
+ APP_NAME = "AR_TRANSCRIPTOR"
+-APP_VERSION = "1.14 editor con lista de frases"
++APP_VERSION = "1.15 copias + seguimiento audio"
+ SUPPORTED_EXTENSIONS = {
+     ".mp4", ".avi", ".mkv", ".mov", ".webm",
+     ".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg", ".wma"
+@@ -110,6 +111,25 @@
+ }
+ 
+ MODEL_CACHE: Dict[Tuple[str, str, str, str], Any] = {}
++AUTOSAVE_SCHEMA_VERSION = 1
++
++
++def app_data_dir() -> Path:
++    """Carpeta local de la app para copias discretas de transcripciones."""
++    root = os.environ.get("LOCALAPPDATA") or os.environ.get("APPDATA")
++    if root:
++        return Path(root) / APP_NAME
++    return Path.home() / f".{APP_NAME.lower()}"
++
++
++def autosave_dir() -> Path:
++    return app_data_dir() / "copias_transcripciones"
++
++
++def safe_file_slug(value: str, fallback: str = "transcripcion") -> str:
++    value = re.sub(r"[^A-Za-z0-9_\-]+", "_", value.strip())
++    value = value.strip("._-")
++    return (value or fallback)[:70]
+ 
+ 
+ def default_settings() -> Dict[str, Any]:
+@@ -938,6 +958,7 @@
+         self.last_result: Optional[Dict[str, Any]] = None
+         self.pr_blocks: List[Dict[str, Any]] = []
+         self.pr_notes: List[str] = []
++        self.current_backup_path: Optional[Path] = None
+         self.worker: Optional[TranscriptionWorker] = None
+         self._setup_ui()
+         self._apply_style()
+@@ -1077,6 +1098,13 @@
+ 
+         actions.addWidget(self.apply_qr_button)
+ 
++        self.import_copy_button = QPushButton("Importar copia")
++        self.import_copy_button.setObjectName("secondaryButton")
++        self.import_copy_button.setMinimumHeight(32)
++        self.import_copy_button.setToolTip("Abrir una copia guardada automaticamente por AR_TRANSCRIPTOR")
++        self.import_copy_button.clicked.connect(self.import_saved_transcription)
++        actions.addWidget(self.import_copy_button)
++
+         export_label = QLabel("Exportar")
+         export_label.setObjectName("exportLabel")
+         actions.addWidget(export_label)
+@@ -1256,7 +1284,7 @@
+         main.addWidget(splitter, stretch=1)
+ 
+         footer_row = QHBoxLayout()
+-        footer = QLabel("Tip: cambia Etiqueta 1 / Etiqueta 2 si queres que diga OPERADOR/LLAMANTE, PREGUNTA/RESPUESTA, etc. Para velocidad: Faster Whisper + int8.")
++        footer = QLabel("Tip: las copias se guardan solas y se pueden recuperar con Importar copia. Para velocidad: Faster Whisper + int8.")
+         footer.setObjectName("footer")
+         footer.setWordWrap(True)
+         # Footer: ayuda breve y acceso directo de donacion por MercadoPago.
+@@ -1682,6 +1710,7 @@
+         self._refresh_pr_list(keep_row=row)
+         self._update_text_from_pr_blocks()
+         self.status_label.setText(f"Bloque {row + 1} marcado como {self.pr_blocks[row]['label']}.")
++        self._autosave_transcription("bloque_marcado")
+ 
+     def set_selected_pr_label(self, label: str) -> None:
+         # Compatibilidad interna con versiones anteriores.
+@@ -1700,6 +1729,7 @@
+         self._refresh_pr_list(keep_row=row)
+         self._update_text_from_pr_blocks()
+         self.status_label.setText(f"Bloque {row + 1} alternado a {self.pr_blocks[row]['label']}.")
++        self._autosave_transcription("bloque_alternado")
+ 
+     def openEditBlockModal(self, blockId: Optional[int] = None) -> None:
+         if isinstance(blockId, bool):
+@@ -1813,6 +1843,10 @@
+             def stop_fragment() -> None:
+                 timer.stop()
+                 player.stop()
++                try:
++                    clear_audio_highlight()
++                except Exception:
++                    pass
+ 
+             def play_fragment() -> None:
+                 current_row = int(state.get("row", row))
+@@ -1835,7 +1869,8 @@
+ 
+             play_button.clicked.connect(play_fragment)
+             stop_button.clicked.connect(stop_fragment)
+-            timer.timeout.connect(auto_stop_fragment)
++            # La conexión del timer se completa después de crear el editor de texto,
++            # porque también actualiza el resaltado de la palabra/sección actual.
+             dialog.finished.connect(lambda _result: stop_fragment())
+ 
+         label_text = QLabel("Etiqueta / interlocutor")
+@@ -1861,9 +1896,70 @@
+ 
+         text_edit = QTextEdit()
+         text_edit.setObjectName("modalTextEdit")
+-        text_edit.setMinimumHeight(190)
++        text_edit.setMinimumHeight(175)
+         layout.addWidget(text_edit, stretch=1)
+ 
++        follow_label = QLabel("Seguimiento: al reproducir, se resalta aproximadamente la palabra o sección actual.")
++        follow_label.setObjectName("miniHelp")
++        follow_label.setWordWrap(True)
++        layout.addWidget(follow_label)
++
++        def clear_audio_highlight() -> None:
++            try:
++                text_edit.setExtraSelections([])
++                follow_label.setText("Seguimiento: al reproducir, se resalta aproximadamente la palabra o sección actual.")
++            except Exception:
++                pass
++
++        def update_audio_highlight() -> None:
++            player_obj = player_state.get("player")
++            if player_obj is None:
++                return
++            current_row = int(state.get("row", row))
++            if current_row < 0 or current_row >= len(self.pr_blocks):
++                clear_audio_highlight()
++                return
++            selected = self.pr_blocks[current_row]
++            start_s = max(float(selected.get("start", 0) or 0), 0.0)
++            end_s = max(float(selected.get("end", start_s) or start_s), start_s + 0.01)
++            pos_s = float(player_obj.position()) / 1000.0
++            if pos_s < start_s:
++                clear_audio_highlight()
++                return
++            current_text = text_edit.toPlainText()
++            matches = list(re.finditer(r"\S+", current_text))
++            if not matches:
++                clear_audio_highlight()
++                return
++            progress = max(0.0, min(1.0, (pos_s - start_s) / max(end_s - start_s, 0.01)))
++            word_index = min(len(matches) - 1, max(0, int(progress * len(matches))))
++            section_size = max(1, min(5, len(matches) // 18 + 1))
++            start_index = max(0, min(word_index, len(matches) - 1))
++            end_index = min(len(matches) - 1, start_index + section_size - 1)
++            cursor = QTextCursor(text_edit.document())
++            cursor.setPosition(matches[start_index].start())
++            cursor.setPosition(matches[end_index].end(), QTextCursor.KeepAnchor)
++            fmt = QTextCharFormat()
++            fmt.setBackground(QColor(251, 146, 60, 115))
++            fmt.setForeground(QColor(255, 255, 255))
++            selection = QTextEdit.ExtraSelection()
++            selection.cursor = cursor
++            selection.format = fmt
++            text_edit.setExtraSelections([selection])
++            preview = current_text[matches[start_index].start():matches[end_index].end()]
++            follow_label.setText(f"Seguimiento: {seconds_to_hhmmss(pos_s)} ≈ «{preview}»")
++
++        timer_obj = player_state.get("timer")
++        player_obj = player_state.get("player")
++        if timer_obj is not None and player_obj is not None:
++            def on_audio_timer() -> None:
++                update_audio_highlight()
++                if player_obj.position() >= int(player_state.get("end_ms", 0)):
++                    timer_obj.stop()
++                    player_obj.stop()
++                    clear_audio_highlight()
++            timer_obj.timeout.connect(on_audio_timer)
++
+         other_blocks_label = QLabel("Otras frases / bloques de la transcripción")
+         other_blocks_label.setObjectName("controlLabel")
+         other_blocks_label.setToolTip("Tocá una frase de la lista para cargarla arriba y modificar etiqueta o texto.")
+@@ -1894,6 +1990,7 @@
+                 if timer_obj is not None:
+                     timer_obj.stop()
+                 player_obj.stop()
++            clear_audio_highlight()
+             current_label = str(selected.get("label", self._label_for_role(str(selected.get("role", "question"))))).upper()
+             if current_label and label_combo.findText(current_label) < 0:
+                 label_combo.addItem(current_label)
+@@ -1961,6 +2058,7 @@
+         self._refresh_pr_list(keep_row=row)
+         self._update_text_from_pr_blocks()
+         self.status_label.setText(f"Bloque {row + 1} editado.")
++        self._autosave_transcription("bloque_editado")
+         dialog.accept()
+ 
+     def marcarEtiqueta1(self) -> None:
+@@ -2092,6 +2190,7 @@
+         engine = str(runtime.get("engine", "openai")).upper()
+         compute = str(runtime.get("compute_type", "")).upper()
+         self.status_label.setText(f"Finalizado. Modelo cacheado para la proxima. Motor: {engine}. Dispositivo: {device}. Precision: {compute}. Hilos: {threads}.{extra}")
++        self._autosave_transcription("finalizada")
+ 
+     def _transcription_failed(self, message: str) -> None:
+         self.status_label.setText("Error durante la transcripcion.")
+@@ -2132,6 +2231,7 @@
+         self._show_raw_segments(segments)
+         self._update_pr_format_button()
+         self.status_label.setText("Formato P/R quitado. La transcripcion vuelve a texto normal, sin bloques P/R.")
++        self._autosave_transcription("pr_quitado")
+ 
+     def apply_qr_format(self) -> None:
+         if not self.last_result:
+@@ -2145,6 +2245,7 @@
+         self._refresh_pr_list()
+         self._update_pr_format_button()
+         self.status_label.setText("Formato P/R aplicado. Ahora podes seleccionar bloques y marcar PREGUNTA o RESPUESTA sin editar todo a mano.")
++        self._autosave_transcription("pr_aplicado")
+ 
+     def _set_busy(self, busy: bool) -> None:
+         self.transcribe_button.setEnabled(not busy)
+@@ -2174,6 +2275,7 @@
+         self.last_result = None
+         self.pr_blocks = []
+         self.pr_notes = []
++        self.current_backup_path = None
+         self.file_label.setText("Ningun archivo seleccionado")
+         self.file_label.setToolTip("Ruta del archivo seleccionado")
+         self.text_edit.clear()
+@@ -2185,6 +2287,114 @@
+         self._set_pr_edit_enabled(False)
+         self._set_export_enabled(False)
+ 
++    def _ensure_autosave_path(self) -> Path:
++        autosave_dir().mkdir(parents=True, exist_ok=True)
++        if self.current_backup_path is not None:
++            try:
++                self.current_backup_path.parent.mkdir(parents=True, exist_ok=True)
++                return self.current_backup_path
++            except Exception:
++                self.current_backup_path = None
++        base_name = Path(self.selected_file).stem if self.selected_file else "transcripcion"
++        slug = safe_file_slug(base_name)
++        stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
++        short_hash = hashlib.sha1(f"{self.selected_file or ''}|{stamp}".encode("utf-8", errors="ignore")).hexdigest()[:6]
++        self.current_backup_path = autosave_dir() / f"{stamp}_{slug}_{short_hash}.artrans.json"
++        return self.current_backup_path
++
++    def _autosave_transcription(self, reason: str = "actualizada") -> None:
++        """Guarda una copia silenciosa/importable sin interrumpir al operador."""
++        if not self.last_result:
++            return
++        try:
++            path = self._ensure_autosave_path()
++            payload = {
++                "schema": "AR_TRANSCRIPTOR_AUTOSAVE",
++                "schema_version": AUTOSAVE_SCHEMA_VERSION,
++                "app_name": APP_NAME,
++                "app_version": APP_VERSION,
++                "saved_at": datetime.now().isoformat(timespec="seconds"),
++                "saved_reason": reason,
++                "selected_file": self.selected_file or "",
++                "file_exists": bool(self.selected_file and Path(self.selected_file).exists()),
++                "displayed_text": self.text_edit.toPlainText().strip() if hasattr(self, "text_edit") else "",
++                "last_result": self.last_result,
++                "pr_blocks": self.pr_blocks,
++                "pr_notes": self.pr_notes,
++                "settings": self.settings,
++                "metadata": self._metadata(),
++            }
++            path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
++            print(f"Copia AR_TRANSCRIPTOR guardada: {path}")
++        except Exception as exc:
++            # Copia discreta: no frena el trabajo ni molesta con ventanas emergentes.
++            print(f"No se pudo guardar copia AR_TRANSCRIPTOR: {exc}")
++
++    def import_saved_transcription(self) -> None:
++        start_dir = str(autosave_dir()) if autosave_dir().exists() else str(Path.home())
++        file_path, _ = QFileDialog.getOpenFileName(
++            self,
++            "Importar copia de transcripción",
++            start_dir,
++            "Copias AR_TRANSCRIPTOR (*.artrans.json *.json);;JSON (*.json);;Todos (*.*)",
++        )
++        if not file_path:
++            return
++        path = Path(file_path)
++        try:
++            payload = json.loads(path.read_text(encoding="utf-8"))
++            if not isinstance(payload, dict):
++                raise ValueError("La copia no tiene formato JSON válido.")
++
++            imported_settings = payload.get("settings")
++            if isinstance(imported_settings, dict):
++                self.settings.update(imported_settings)
++
++            raw_result = payload.get("last_result") or payload.get("raw_result")
++            if not isinstance(raw_result, dict):
++                text = str(payload.get("text") or payload.get("displayed_text") or "").strip()
++                segments = payload.get("segments") if isinstance(payload.get("segments"), list) else []
++                raw_result = {"text": text, "segments": segments}
++
++            self.last_result = raw_result
++            self.selected_file = str(payload.get("selected_file") or raw_result.get("file_path") or "") or None
++            self.current_backup_path = path
++            if self.selected_file:
++                self.file_label.setText(self.selected_file)
++                self.file_label.setToolTip(self.selected_file)
++            else:
++                self.file_label.setText(f"Copia importada: {path.name}")
++                self.file_label.setToolTip(str(path))
++
++            imported_blocks = payload.get("pr_blocks")
++            self.pr_blocks = imported_blocks if isinstance(imported_blocks, list) else []
++            imported_notes = payload.get("pr_notes")
++            self.pr_notes = imported_notes if isinstance(imported_notes, list) else []
++
++            displayed_text = str(payload.get("displayed_text") or "").strip()
++            if displayed_text:
++                self.text_edit.setPlainText(displayed_text)
++            elif self.pr_blocks:
++                self._update_text_from_pr_blocks()
++            else:
++                text = str(self.last_result.get("text", "")).strip()
++                segments = self.last_result.get("segments", []) or []
++                cleanup = bool(self.settings.get("clean_text", True))
++                self.text_edit.setPlainText(build_formatted_text("normal", segments, text, cleanup=cleanup))
++
++            if self.pr_blocks:
++                self._refresh_pr_list(keep_row=0)
++            else:
++                self._show_raw_segments(self.last_result.get("segments", []) or [])
++
++            self.progress_bar.setValue(100)
++            self._set_export_enabled(True)
++            self.apply_qr_button.setEnabled(True)
++            self._update_pr_format_button()
++            self.status_label.setText(f"Copia importada: {path.name}")
++        except Exception as exc:
++            QMessageBox.critical(self, "No se pudo importar", str(exc))
++
+     def _metadata(self) -> Dict[str, Any]:
+         language = str(self.settings.get("language", "Espanol"))
+         return {

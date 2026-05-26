@@ -1,0 +1,20 @@
+AR_TRANSCRIPTOR v1.22 - Revisión inteligente general
+
+Cambios:
+- Nuevo botón “🔎 Revisar” en el panel de bloques.
+- Nuevo atajo Ctrl+R para abrir la revisión.
+- Panel de revisión inteligente general, sin enfoque policial.
+- Permite cargar palabras clave separadas por coma.
+- Detecta coincidencias de palabras clave dentro de la transcripción.
+- Detecta silencios o pausas prolongadas entre fragmentos.
+- Detecta segmentos largos que conviene dividir o revisar.
+- Detecta posibles palabras de baja confianza cuando el motor entrega probabilidad por palabra.
+- Doble click en un hallazgo para ubicar el bloque y buscar el término en el texto.
+- Guarda palabras clave de revisión dentro de las copias importables.
+
+Uso:
+- Cargar/transcribir un archivo.
+- Tocar “🔎 Revisar” o Ctrl+R.
+- Escribir palabras clave separadas por coma.
+- Tocar Analizar.
+- Doble click en cualquier resultado para ubicarlo.

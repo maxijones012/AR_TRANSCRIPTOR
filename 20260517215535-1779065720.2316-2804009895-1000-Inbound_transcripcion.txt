@@ -1,0 +1,49 @@
+TRANSCRIPCION DE AUDIO/VIDEO
+
+Archivo: D:\Users\Maxi\Desktop\EXTRA\Hacking\D.P.I\2026\trans 557\20260517215535-1779065720.2316-2804009895-1000-Inbound.wav
+Modelo: medium
+Idioma: Espanol
+Tarea: Transcribir
+Formato: Texto normal
+Perfil rendimiento: Rapido
+Dispositivo: Automatico
+Motor: OpenAI Whisper oficial
+Precision/compute: Auto
+Audio optimizado: Si
+Hilos CPU/FFmpeg: Auto
+Troceo archivo: 10 min
+Limpieza basica: Si
+Fecha/hora: 22/05/2026 09:47:15
+
+TEXTO COMPLETO:
+policía buenas noches hola te llamo carnavalera 4 en la paso de indio le pegaron a un nene y le sacaron la bici le robaron la bici que esta? si en la paso de indio y costanera paso de indio y costanera como seria la bici que esta? un no se una de las grandes un gold blanco era una chica se bajo y le sacaron la bici ¿Es una bici chiquitita o grande? No, es la grande, la nueva Ah, una bici rota 26 Es un gol blanco el que le robaron la bici Si, y la metió en el bagul ¿Cómo pasó? ¿Ole, me escucha? Hola Le pegaron al chico A un hombre grande fue? No, no, un chico, un nene. ¿A un menor? Sí, la chica que se llevó la bici tiene una campera rosada. ¿Una campera rosada? Sí. Bueno, ahí avisamos. Para la Costanera se fueron. ¿Para el correo de Costanera? Sí. Bueno, ahí avisamos, sí.
+
+SEGMENTOS:
+[00:00:00 - 00:00:04] policía buenas noches
+[00:00:04 - 00:00:08] hola te llamo carnavalera 4 en la paso de indio
+[00:00:08 - 00:00:12] le pegaron a un nene y le sacaron la bici
+[00:00:12 - 00:00:14] le robaron la bici que esta?
+[00:00:14 - 00:00:16] si en la paso de indio y costanera
+[00:00:16 - 00:00:20] paso de indio y costanera como seria la bici que esta?
+[00:00:20 - 00:00:24] un no se una de las grandes un gold blanco
+[00:00:24 - 00:00:28] era una chica se bajo y le sacaron la bici
+[00:00:28 - 00:00:30] ¿Es una bici chiquitita o grande?
+[00:00:30 - 00:00:32] No, es la grande, la nueva
+[00:00:32 - 00:00:34] Ah, una bici rota 26
+[00:00:34 - 00:00:38] Es un gol blanco el que le robaron la bici
+[00:00:38 - 00:00:42] Si, y la metió en el bagul
+[00:00:42 - 00:00:44] ¿Cómo pasó?
+[00:00:44 - 00:00:48] ¿Ole, me escucha?
+[00:00:48 - 00:00:50] Hola
+[00:00:50 - 00:00:52] Le pegaron al chico
+[00:00:52 - 00:00:56] A un hombre grande fue?
+[00:00:56 - 00:00:58] No, no, un chico, un nene.
+[00:00:58 - 00:00:59] ¿A un menor?
+[00:00:59 - 00:01:04] Sí, la chica que se llevó la bici tiene una campera rosada.
+[00:01:04 - 00:01:05] ¿Una campera rosada?
+[00:01:05 - 00:01:06] Sí.
+[00:01:06 - 00:01:08] Bueno, ahí avisamos.
+[00:01:08 - 00:01:10] Para la Costanera se fueron.
+[00:01:10 - 00:01:11] ¿Para el correo de Costanera?
+[00:01:11 - 00:01:12] Sí.
+[00:01:12 - 00:01:15] Bueno, ahí avisamos, sí.

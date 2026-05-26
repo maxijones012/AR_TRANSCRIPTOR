@@ -1,0 +1,5 @@
+openai-whisper
+faster-whisper
+PySide6
+python-docx
+pyinstaller

@@ -1,0 +1,8 @@
+AR_TRANSCRIPTOR v1.16 - progreso + duracion
+
+Cambios:
+- Agregado indicador pequeno en la barra de progreso con porcentaje actual.
+- Agregada duracion detectada del audio/video cargado.
+- La duracion se obtiene con ffprobe cuando esta disponible.
+- Si se importa una copia, conserva/recupera la duracion desde la copia o desde segmentos.
+- Las copias automaticas ahora guardan media_duration_seconds.

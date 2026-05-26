@@ -1,0 +1,8 @@
+AR_TRANSCRIPTOR v1.19
+
+- Activa timestamps por palabra en Faster Whisper y Whisper oficial cuando el motor lo permite.
+- Guarda las palabras sincronizadas dentro de segmentos, bloques P/R y copias importables.
+- En el editor de bloque, el resaltado pasa a ser exacto cuando hay timestamps por palabra.
+- Si no hay timestamps por palabra, conserva el resaltado aproximado por sección.
+- Agrega el botón “Ir a palabra seleccionada” para saltar el audio al punto de la palabra elegida.
+- Mantiene enfoque general/profesional, no específico policial.

@@ -1,0 +1,51 @@
+WHISPER TRANSCRIPTOR DPI - v1.4 RENDIMIENTO
+
+ORDEN RECOMENDADO:
+
+1) install_python_311_winget.bat
+2) cerrar ventana y abrir otra
+3) install_dependencies.bat
+4) install_ffmpeg_winget.bat
+5) run_app.bat
+
+CONFIGURACION RECOMENDADA:
+
+- Modelo: small
+- Idioma: Espanol
+- Tarea: Transcribir
+- Formato: Texto normal o Entrevista P/R automatica
+- Rendimiento: Rapido
+- Dispositivo: Automatico
+- Optimizar audio/video: activado
+
+QUE SE MEJORO:
+
+- Cache del modelo: la segunda transcripcion con el mismo modelo arranca mas rapido.
+- Perfil Rapido / Equilibrado / Preciso.
+- Opcion CPU / GPU CUDA / Automatico.
+- Conversion temporal a WAV mono 16 kHz para mejorar rendimiento y estabilidad.
+- Word/TXT ahora incluyen datos de rendimiento.
+
+SI ANDA LENTO:
+
+- Probar modelo base.
+- Probar modelo tiny.
+- Dejar idioma en Espanol.
+- Usar Rendimiento Rapido.
+
+SI QUERES MAS PRECISION:
+
+- Usar small o medium.
+- Usar Rendimiento Equilibrado o Preciso.
+
+--- v1.8 P/R editable ---
+Ahora podes corregir la clasificacion PREGUNTA/RESPUESTA desde el panel derecho:
+- Selecciona el bloque.
+- Toca PREGUNTA o RESPUESTA.
+- Doble click alterna.
+- El texto completo se actualiza solo.
+
+v1.9:
+- Ahora podes cambiar los nombres de PREGUNTA/RESPUESTA desde Etiqueta 1 y Etiqueta 2.
+  Ejemplo: Etiqueta 1 = OPERADOR, Etiqueta 2 = LLAMANTE.
+- Para mas velocidad usa Motor = Faster Whisper (mas rapido) y Precision = Auto o int8 CPU rapido.

@@ -1,0 +1,92 @@
+diff -ruN -x __pycache__ ar_v113/NOTAS_v1.14.txt ar_v114/NOTAS_v1.14.txt
+--- ar_v113/NOTAS_v1.14.txt	1970-01-01 00:00:00.000000000 +0000
++++ ar_v114/NOTAS_v1.14.txt	2026-05-26 01:13:37.792752445 +0000
+@@ -0,0 +1,8 @@
++AR_TRANSCRIPTOR v1.14
++
++Cambios:
++- El editor de bloque ahora muestra abajo una lista de todas las frases/bloques.
++- Al hacer click en cualquier frase de esa lista, se carga en el editor para modificar etiqueta e texto.
++- Se mantiene el reproductor de fragmento por bloque.
++- Se corrigio el QTextEdit duplicado dentro del modal.
++- Version actualizada a 1.14 editor con lista de frases.
+diff -ruN -x __pycache__ ar_v113/main.py ar_v114/main.py
+--- ar_v113/main.py	2026-05-26 00:12:23.000000000 +0000
++++ ar_v114/main.py	2026-05-26 01:13:53.207719066 +0000
+@@ -46,7 +46,7 @@
+ from theme import build_stylesheet, load_theme_name, save_theme_name, theme_toggle_text
+ 
+ APP_NAME = "AR_TRANSCRIPTOR"
+-APP_VERSION = "1.13 P/R toggle + reproductor"
++APP_VERSION = "1.14 editor con lista de frases"
+ SUPPORTED_EXTENSIONS = {
+     ".mp4", ".avi", ".mkv", ".mov", ".webm",
+     ".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg", ".wma"
+@@ -1715,7 +1715,7 @@
+         dialog.setObjectName("prEditDialog")
+         dialog.setWindowTitle("Editar bloque de transcripción")
+         dialog.setModal(True)
+-        dialog.resize(720, 520)
++        dialog.resize(900, 680)
+ 
+         layout = QVBoxLayout(dialog)
+         layout.setContentsMargins(18, 18, 18, 18)
+@@ -1861,9 +1861,24 @@
+ 
+         text_edit = QTextEdit()
+         text_edit.setObjectName("modalTextEdit")
+-        text_edit.setMinimumHeight(220)
++        text_edit.setMinimumHeight(190)
+         layout.addWidget(text_edit, stretch=1)
+ 
++        other_blocks_label = QLabel("Otras frases / bloques de la transcripción")
++        other_blocks_label.setObjectName("controlLabel")
++        other_blocks_label.setToolTip("Tocá una frase de la lista para cargarla arriba y modificar etiqueta o texto.")
++        layout.addWidget(other_blocks_label)
++
++        modal_blocks_list = QListWidget()
++        modal_blocks_list.setObjectName("modalBlockList")
++        modal_blocks_list.setMinimumHeight(105)
++        modal_blocks_list.setMaximumHeight(160)
++        modal_blocks_list.setToolTip("Tocá una frase para seleccionarla y editarla en este mismo modal")
++        for idx, item in enumerate(self.pr_blocks):
++            modal_blocks_list.addItem(self._format_block_item(idx, item))
++        modal_blocks_list.setCurrentRow(row)
++        layout.addWidget(modal_blocks_list)
++
+         def load_block(index: int) -> None:
+             row_value = block_combo.itemData(index)
+             if row_value is None:
+@@ -1884,7 +1899,17 @@
+                 label_combo.addItem(current_label)
+             label_combo.setCurrentText(current_label)
+             text_edit.setPlainText(str(selected.get("text", "")))
++            modal_blocks_list.blockSignals(True)
++            modal_blocks_list.setCurrentRow(state["row"])
++            modal_blocks_list.blockSignals(False)
++
++        def select_block_from_bottom_list(item) -> None:
++            selected_row = modal_blocks_list.row(item)
++            if 0 <= selected_row < block_combo.count():
++                block_combo.setCurrentIndex(selected_row)
+ 
++        modal_blocks_list.itemClicked.connect(select_block_from_bottom_list)
++        modal_blocks_list.itemDoubleClicked.connect(select_block_from_bottom_list)
+         block_combo.currentIndexChanged.connect(load_block)
+         load_block(block_combo.currentIndex())
+ 
+diff -ruN -x __pycache__ ar_v113/theme.py ar_v114/theme.py
+--- ar_v113/theme.py	2026-05-25 23:39:31.000000000 +0000
++++ ar_v114/theme.py	2026-05-26 01:13:37.792520964 +0000
+@@ -361,6 +361,11 @@
+             min-height: 55px;
+             padding: 5px;
+         }}
++        QListWidget#modalBlockList {{
++            min-height: 105px;
++            max-height: 160px;
++            padding: 6px;
++        }}
+         QListWidget::item {{
+             border-radius: 6px;
+             padding: 5px;

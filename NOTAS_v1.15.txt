@@ -1,0 +1,12 @@
+AR_TRANSCRIPTOR v1.15 - copias + seguimiento de audio
+
+Cambios:
+- Guarda una copia importable de cada transcripción de manera silenciosa en la carpeta local de la app.
+- Agrega botón "Importar copia" para recuperar trabajos anteriores.
+- Las copias incluyen texto mostrado, segmentos, bloques P/R, etiquetas, configuración y ruta del archivo original.
+- En el editor de bloque, al reproducir el fragmento se resalta aproximadamente la palabra o sección del texto por donde va el audio.
+- El resaltado funciona de forma aproximada por proporción de tiempo del bloque; si el audio original no está disponible, el reproductor avisa.
+
+Uso:
+- Probar: run_app.bat
+- Generar EXE: build_windows.bat
