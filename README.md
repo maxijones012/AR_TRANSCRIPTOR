@@ -1,68 +1,68 @@
-# Whisper Transcriptor DPI
+# AR_TRANSCRIPTOR
 
-Aplicacion de escritorio local para transcribir audio/video con OpenAI Whisper.
+Transcripción local de audio y video usando Whisper/Faster-Whisper.
 
-## Version
+AR_TRANSCRIPTOR está pensado como una herramienta moderna, rápida y editable para convertir audio/video en texto, manteniendo control total del usuario sobre la edición y revisión.
 
-v1.8 P/R editable
+## Características
 
-## Funciones principales
+* Transcripción local (sin subir archivos)
+* Compatible con audio y video
+* Edición por bloques
+* Formato conversación / PREGUNTA-RESPUESTA
+* Copias automáticas importables
+* Timeline y navegación rápida
+* Búsqueda dentro de la transcripción
+* Reproducción sincronizada
+* Timestamps por palabra
+* Interlocutores editables
+* Exportación TXT / SRT / VTT / JSON / Word
+* Modo oscuro profesional
+* Atajos de teclado
+* Escucha rápida
 
-- Carga de audio o video.
-- Seleccion de modelo Whisper: tiny, base, small, medium, large, turbo.
-- Seleccion de idioma automatico o manual.
-- Transcripcion o traduccion al ingles.
-- Optimizacion previa con FFmpeg.
-- Control de hilos CPU/FFmpeg.
-- Troceo de archivos largos.
-- Formato normal, P/R alternado simple y P/R inteligente llamada.
-- Bloques PREGUNTA/RESPUESTA editables desde la interfaz.
-- Exportacion a TXT, SRT, VTT, JSON y Word.
+## Compatibilidad
 
-## Instalar dependencias
+* Windows
+* Python 3.10+
+* Faster-Whisper
+* OpenAI Whisper
 
-Ejecutar:
+## Uso
 
-```bat
-install_dependencies.bat
-```
-
-## Instalar FFmpeg
-
-Ejecutar:
-
-```bat
-install_ffmpeg_winget.bat
-```
-
-## Ejecutar la app
-
-```bat
+```bash
 run_app.bat
 ```
 
-## Compilar EXE
+Para generar ejecutable:
 
-```bat
+```bash
 build_windows.bat
 ```
 
-El ejecutable queda en:
+## Filosofía
 
-```text
-dist\WhisperTranscriptorDPI.exe
-```
+AR_TRANSCRIPTOR busca combinar:
 
-## Recomendacion de uso
+* IA asistida
+* edición humana
+* velocidad
+* control
+* privacidad
 
-Para llamadas o entrevistas breves:
+Todo el procesamiento se realiza localmente en el equipo del usuario.
 
-- Modelo: small
-- Idioma: Espanol
-- Formato: P/R inteligente llamada
-- Rendimiento: Rapido o Equilibrado
-- Hilos: Auto
-- Trocear: 10 min o 15 min
-- Limpieza policial basica: activada
+## Donaciones
 
-Luego corregir los bloques desde el panel derecho con los botones PREGUNTA/RESPUESTA.
+Si el proyecto te resulta útil y querés apoyar el desarrollo:
+
+☕ Podés colaborar mediante donaciones voluntarias.
+
+## Licencia
+
+MIT License
+
+## Aviso
+
+El usuario es responsable del uso que haga del software y del cumplimiento de las leyes aplicables en su jurisdicción.
+
