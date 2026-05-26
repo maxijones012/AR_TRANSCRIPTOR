@@ -5,6 +5,7 @@ Transcripción local de audio y video usando Whisper/Faster-Whisper.
 AR_TRANSCRIPTOR está pensado como una herramienta moderna, rápida y editable para convertir audio/video en texto, manteniendo control total del usuario sobre la edición y revisión.
 
 ## Características
+<img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/e2647550-c04f-489f-b01c-55f5dd024a94" />
 
 * Transcripción local (sin subir archivos)
 * Compatible con audio y video
