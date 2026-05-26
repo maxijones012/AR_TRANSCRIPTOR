@@ -59,6 +59,7 @@ Todo el procesamiento se realiza localmente en el equipo del usuario.
 Si el proyecto te resulta útil y querés apoyar el desarrollo:
 
 ☕ Podés colaborar mediante donaciones voluntarias.
+https://www.mercadopago.com.ar/checkout/v1/payment/redirect/2e790347-7134-4f18-b167-f8eb50c64d03/payment-option-form/?source=link&preference-id=156212993-95695f4b-e181-48e2-aa34-d4c5b8b4656f&router-request-id=dbfbc2fe-ce2a-42ce-9a75-41465199039c&p=a1a105ff8bd80174dc727869d68aa8ca
 
 ## Licencia
 
